@@ -1,5 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import { parseCookies, setCookie } from 'nookies';
+import { signOut } from '../contexts/AuthContext';
 
 let cookies = parseCookies();
 let isRefreshing = false;
@@ -41,12 +42,13 @@ api.interceptors.response.use(response => {
           })
   
           api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          
 
           failedRequestsQueue.forEach(request => request.onSuccess(token));
           failedRequestsQueue = [];
 
         }).catch(err => {
-          failedRequestsQueue.forEach(request => request.onSuccess(err));
+          failedRequestsQueue.forEach(request => request.onFailure(err));
           failedRequestsQueue = [];
         })
         .finally(() => {
@@ -57,12 +59,10 @@ api.interceptors.response.use(response => {
       return new Promise((resolve, reject) => {
         failedRequestsQueue.push({
           onSuccess: (token: string) => {
-
             if (originalConfig.headers) {
               originalConfig.headers['Authorization'] = `Bearer ${token}`;
               resolve(api(originalConfig));
             }
-
           },
           onFailure: (err: AxiosError) => {
             reject(err);
@@ -70,7 +70,9 @@ api.interceptors.response.use(response => {
         })
       })
     } else {
-      // deslogar usuário
+      signOut();
     }
   }
+
+  return Promise.reject(error);
 })
