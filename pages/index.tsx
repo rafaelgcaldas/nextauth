@@ -2,6 +2,7 @@ import { GetServerSideProps } from 'next';
 import { parseCookies } from 'nookies';
 import { FormEvent, useContext, useState } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
+import { setupAPIClient } from '../services/api';
 import styles from '../styles/Home.module.css';
 import { withSSRGuest } from '../utils/withSSRGuest';
 
@@ -32,6 +33,12 @@ export default function Home() {
 }
 
 export const getServerSideProps = withSSRGuest(async (ctx) => {
+  const apiClient = setupAPIClient(ctx);
+
+  const response = await apiClient.get('/me');
+
+  console.log(response.data);
+
   return {
     props: {}
   }
