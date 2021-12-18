@@ -63,6 +63,13 @@ export function withSSRAuth<P>(fn: GetServerSideProps<P>, options?: WithSSRAuthO
           }
         }
       }
+
+      return {
+        redirect: {
+          destination: '/dashboard',
+          permanent: false
+        }
+      }
     }
     
   }
